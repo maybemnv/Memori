@@ -1,7 +1,8 @@
-[![Memori Labs](https://s3.us-east-1.amazonaws.com/images.memorilabs.ai/banner.png)](https://memorilabs.ai/)
+[![Memori Labs](https://s3.us-east-1.amazonaws.com/images.memorilabs.ai/banner-dark.jpg)](https://memorilabs.ai/)
+
 
 <p align="center">
-  <strong>The memory fabric for enterprise AI</strong>
+  <strong>Memory from what agents do, not just what they say.</strong>
 </p>
 
 <p align="center">
@@ -40,6 +41,14 @@
     <img src="https://img.shields.io/badge/⭐%20Give%20a%20Star-Support%20the%20project-orange?style=for-the-badge" alt="Give a Star">
   </a>
 </p>
+
+<p align="center">
+  <strong>Choose memory that performs</strong>
+</p>
+
+
+
+[![Memori Labs](https://s3.us-east-1.amazonaws.com/images.memorilabs.ai/stats.jpg)](https://memorilabs.ai/benchmark)
 
 ---
 
@@ -324,11 +333,10 @@ We welcome contributions from the community! Please see our [Contributing Guidel
 
 ## Support
 
-- **Memori Cloud Documentation**: [memorilabs.ai/docs/memori-cloud/](https://memorilabs.ai/docs/memori-cloud/)
-- **Memori BYODB Documentation**: [https://memorilabs.ai/docs/memori-byodb/](https://memorilabs.ai/docs/memori-byodb/)
-- **Discord**: [https://discord.gg/abD4eGym6v](https://discord.gg/abD4eGym6v)
-- **Issues**: [GitHub Issues](https://github.com/MemoriLabs/Memori/issues)
-
+- [**Memori Cloud Documentation**](https://memorilabs.ai/docs/memori-cloud)
+- [**Memori BYODB Documentation**](https://memorilabs.ai/docs/memori-byodb)
+- [**Discord**](https://discord.gg/FpytKAxnFb)
+- [**Issues**](https://github.com/MemoriLabs/Memori/issues)
 ---
 
 ## License
