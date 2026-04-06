@@ -547,6 +547,50 @@ def test_inject_recalled_facts_dedupes_same_summary_text_different_dates():
     assert context.count(same_text) == 1
 
 
+def test_inject_recalled_facts_includes_all_summaries_for_included_facts():
+    config = Config()
+    config.storage = Mock()
+    config.storage.driver = Mock()
+    config.storage.driver.entity.create.return_value = 1
+    config.entity_id = "test-entity"
+    config.recall_facts_limit = 1
+    invoke = BaseInvoke(config, "test_method")
+
+    kwargs = {"messages": [{"role": "user", "content": "What should I remember?"}]}
+    with patch("memori.memory.recall.Recall") as mock_recall:
+        mock_recall.return_value.search_facts.return_value = [
+            {
+                "id": 1,
+                "content": "Fact one",
+                "similarity": 0.94,
+                "date_created": "2026-03-24 18:01:00",
+                "summaries": [
+                    {"content": "Summary one", "date_created": "2026-03-24 18:01:00"},
+                    {"content": "Summary two", "date_created": "2026-03-24 18:02:00"},
+                ],
+            },
+            {
+                "id": 2,
+                "content": "Fact two",
+                "similarity": 0.93,
+                "date_created": "2026-03-25 09:00:00",
+                "summaries": [
+                    {
+                        "content": "Summary three",
+                        "date_created": "2026-03-25 09:00:00",
+                    }
+                ],
+            },
+        ]
+        result = inject_recalled_facts(invoke, kwargs)
+
+    context = result["messages"][0]["content"]
+    assert context.count("- [") == 3
+    assert "Summary one" in context
+    assert "Summary three" in context
+    assert "Summary two" in context
+
+
 def test_inject_recalled_facts_filters_by_relevance():
     config = Config()
     config.storage = Mock()

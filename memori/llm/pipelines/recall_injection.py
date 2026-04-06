@@ -50,24 +50,56 @@ def format_recalled_fact_lines(
     return lines
 
 
-def format_recalled_summary_lines(summaries: list[dict[str, object]]) -> list[str]:
+def format_recalled_summary_lines(
+    facts: list[FactSearchResult | Mapping[str, object] | str],
+) -> list[str]:
+    primary_summaries: list[dict[str, object]] = []
+    additional_summaries: list[dict[str, object]] = []
+
+    for fact in facts:
+        summaries_raw: object | None = None
+        if isinstance(fact, Mapping):
+            fact_map = cast(Mapping[str, object], fact)
+            summaries_raw = fact_map.get("summaries")
+        elif hasattr(fact, "summaries"):
+            summaries_raw = cast(object, fact.summaries)
+
+        if not isinstance(summaries_raw, list):
+            continue
+
+        has_primary_for_fact = False
+        for summary in summaries_raw:
+            if not isinstance(summary, Mapping):
+                continue
+            content = summary.get("content")
+            if not isinstance(content, str) or not content.strip():
+                continue
+
+            summary_dict = {
+                "content": content,
+                "date_created": summary.get("date_created"),
+            }
+            if not has_primary_for_fact:
+                primary_summaries.append(summary_dict)
+                has_primary_for_fact = True
+            else:
+                additional_summaries.append(summary_dict)
+
     lines: list[str] = []
     seen: set[str] = set()
-    for summary in summaries:
-        content = summary.get("content")
-        if not isinstance(content, str) or not content.strip():
-            continue
+    for summary_group in (primary_summaries, additional_summaries):
+        for summary in summary_group:
+            content = cast(str, summary["content"])
+            content_key = content.strip()
+            if content_key in seen:
+                continue
+            seen.add(content_key)
 
-        content_key = content.strip()
-        if content_key in seen:
-            continue
-        seen.add(content_key)
-
-        ts = format_date_created(summary.get("date_created"))
-        if ts:
-            lines.append(f"- [{ts}]\n  {content}")
-        else:
-            lines.append(f"- {content}")
+            ts = format_date_created(summary.get("date_created"))
+            if ts:
+                lines.append(f"- [{ts}]\n  {content}")
+            else:
+                lines.append(f"- {content}")
     return lines
 
 
@@ -141,7 +173,7 @@ def inject_recalled_facts(invoke, kwargs: dict) -> dict:
         cast(list, relevant_facts)
     )
     fact_lines = format_recalled_fact_lines(relevant_facts)
-    summary_lines = format_recalled_summary_lines(invoke._cloud_summaries)
+    summary_lines = format_recalled_summary_lines(relevant_facts)
     context_body = "Relevant context about the user:\n" + "\n".join(fact_lines)
     if summary_lines:
         context_body += "\n\n## Summaries\n\n" + "\n\n".join(summary_lines)
@@ -151,6 +183,7 @@ def inject_recalled_facts(invoke, kwargs: dict) -> dict:
         + context_body
         + "\n</memori_context>"
     )
+
     if llm_is_anthropic(
         invoke.config.framework.provider, invoke.config.llm.provider
     ) or llm_is_bedrock(invoke.config.framework.provider, invoke.config.llm.provider):
